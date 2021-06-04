@@ -1,0 +1,8 @@
+# Main Binary File
+cake-catalog
+
+# Vendor Folder
+vendor/*
+
+# VS Code Config
+.vscode/*
