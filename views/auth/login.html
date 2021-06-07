@@ -1,0 +1,24 @@
+<div class="container-fluid d-flex align-items-center justify-content-center align-content-center">
+    <div class="card">
+        <div class="card-title" style="text-align: center;">
+            <h5 class="mt-2">Login to<br>Niel's Kitchen Catalog</h5>
+        </div>
+        <div class="alert alert-danger" style="display: none;"></div>
+        <div class="card-body">
+            <div id="user-login">
+                {{.xsrfdata}}
+                <div class="mb-3">
+                    <label for="username" class="form-label">User Name</label>
+                    <input type="text" class="form-control" name="username" id="username" aria-describedby="usernameHelp" required>
+                    <div class="invalid-feedback">Please enter a username!</div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" name="password" id="password" required>
+                    <div class="invalid-feedback">Please enter a password!</div>
+                </div>
+                <button type="submit" class="btn btn-primary login-submit">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>

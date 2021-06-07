@@ -7,6 +7,8 @@ import (
 )
 
 func init() {
+	beego.Router("/", &controllers.MainController{}, "get:Homepage")
+
 	auth := beego.NewNamespace("/auth",
 		beego.NSRouter("/login", &controllers.AuthController{}, "get:LoginPage"),
 		beego.NSRouter("/login", &controllers.AuthController{}, "post:DoLogin"),
@@ -16,22 +18,18 @@ func init() {
 		beego.NSRouter("/resetPassword/:token", &controllers.AuthController{}, "get:ResetPassword"),
 		beego.NSRouter("/resetPassword/:token", &controllers.AuthController{}, "post:DoResetPassword"),
 		beego.NSRouter("/resetPasswordSuccess", &controllers.AuthController{}, "get:SuccessResetPassword"),
+		beego.NSRouter("/signup", &controllers.AuthController{}, "get:SignUp"),
+		beego.NSRouter("/signup", &controllers.AuthController{}, "get:DoSignUp"),
 	)
-
-	main := beego.NewNamespace("/",
-		beego.NSRouter("", &controllers.MainController{}, "get:Homepage"),
-	)
+	beego.AddNamespace(auth)
 
 	catalog := beego.NewNamespace("/catalog",
-		beego.NSRouter("", &controllers.CatalogController{}, "get:GetCatalog"),
+		beego.NSRouter("/", &controllers.CatalogController{}, "get:GetCatalog"),
 		beego.NSRouter("cake/:id", &controllers.CatalogController{}, "get:GetCake"),
 		beego.NSRouter("cake/:id/update", &controllers.CatalogController{}, "put:UpdateCake"),
 		beego.NSRouter("cake/:id/delete", &controllers.CatalogController{}, "delete:DeleteCake"),
 		beego.NSRouter("cake/add", &controllers.CatalogController{}, "get:AddCake"),
 		beego.NSRouter("cake/add", &controllers.CatalogController{}, "post:DoAddCake"),
 	)
-
-	beego.AddNamespace(main)
-	beego.AddNamespace(auth)
 	beego.AddNamespace(catalog)
 }
