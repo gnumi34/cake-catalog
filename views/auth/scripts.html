@@ -28,25 +28,24 @@
                     success: function(res) {
                         if (res["data"]["response"] == "ok") {
                             window.location.href = "/";
-                        } else if (res["data"]["response"] == "not found" || res["data"]["response"] == "not found")  {
+                        } else if (res["data"]["response"] == "not found")  {
                             console.log(`Error: ${res["data"]["response"]}`);
                             alert.html("Invalid username / password. Please try again.").show();
                         } else {
-                            console.log(`Error: ${res["data"]["response"]}`);
+                            console.log(`Error: ${res["data"]["errors"]}`);
                             alert.html("Backend server error. Please try again later.").show();
                         }
                     },
                     error: function() {
-                        alert.html("Failed to connect the authentication backend.").show();
+                        alert.html("Failed to connect with the authentication backend.").show();
                     }
                 });
-            } else if (username != "" && password == "") {
+            } 
+            if (password == "") {
                 $("#password").parent().children(".invalid-feedback").show();
-            } else if (username == "" && password != "") {
+            } 
+            if (username == "") {
                 $("#username").parent().children(".invalid-feedback").show();
-            } else {
-                $("#username").parent().children(".invalid-feedback").show();
-                $("#password").parent().children(".invalid-feedback").show();
             }
         });
 
@@ -103,12 +102,12 @@
                                 </ul>
                                 `).show();
                             } else {
-                                console.log(`Error: ${res["data"]["response"]}`);
+                                console.log(`Error: ${res["data"]["errors"]}`);
                                 alert.html("Backend server error. Please try again later.").show();
                             }
                         },
                         error: function() {
-                            alert.html("Failed to connect the authentication backend.").show();
+                            alert.html("Failed to connect with the authentication backend.").show();
                         }
                     });
                 } else {
@@ -134,6 +133,47 @@
             }
             if (email == "") {
                 $("#email").parent().children(".invalid-feedback").show();
+            }
+        });
+
+        $(".password-reset-submit").click(function() {
+            // Hide errors on form
+            alert.hide();
+            $("#username").parent().children(".invalid-feedback").hide();
+
+            var username = $("#username").val().trim();
+            var xsrf_token = $('input[name="_xsrf"]').val().trim();
+
+            if (username != "") {
+                $.ajax({
+                    url: "/auth/forgetPassword",
+                    type: "post",
+                    dataType: "json",
+                    contentType: "application/json",
+                    headers: {
+                        'X-XSRFToken': xsrf_token
+                    },
+                    data: JSON.stringify({
+                        "username": username,
+                    }),
+                    success: function(res) {
+                        if (res["data"]["response"] == "ok") {
+                            window.location.href = "/auth/forgetPassword";
+                        } else if (res["data"]["response"] == "not found")  {
+                            console.log(`Error: ${res["data"]["response"]}`);
+                            alert.html("The user name you entered is not registered.<br>Try again.").show();
+                        } else {
+                            console.log(`Error: ${res["data"]["errors"]}`);
+                            alert.html("Backend server error. Please try again later.").show();
+                        }
+                    },
+                    error: function() {
+                        alert.html("Failed to connect with the authentication backend.").show();
+                    }
+                });
+            }
+            if (username == "") {
+                $("#username").parent().children(".invalid-feedback").show();
             }
         });
     });
