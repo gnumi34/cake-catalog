@@ -1,0 +1,53 @@
+<div class="container-fluid d-flex align-items-center justify-content-center">
+    <div class="card">
+        <div class="card-title" style="text-align: center;">
+            <h5 class="mt-2">Sign up to<br>Niel's Kitchen Catalog</h5>
+        </div>
+        <div class="alert alert-danger" style="display: none;"></div>
+        <div class="card-body">
+            <div id="user-signup">
+                {{.xsrfdata}}
+                <div class="row mb-3">
+                    <label for="username" class="col-sm-4 col-form-label">User Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="username" id="username" required>
+                        <div class="invalid-feedback">Please enter a username!</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="password1" class="col-sm-4 col-form-label">Password</label>
+                    <div class="col-sm-8">
+                        <input type="password" class="form-control" name="password1" id="password1" aria-describedby="passwordHelp" required minlength="8" maxlength="20">
+                        <span class="form-text" id="passwordHelp">Password should have 8-20 characters length.</span>
+                        <div class="invalid-feedback">Please enter a password!</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="password2" class="col-sm-4 col-form-label">Retype Password</label>
+                    <div class="col-sm-8">
+                        <input type="password" class="form-control" name="password2" id="password2" required>
+                        <div class="invalid-feedback">Password does not match!</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="name" class="col-sm-4 col-form-label">Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control" name="name" id="name" aria-describedby="nameHelp" required>
+                        <div class="invalid-feedback">Please provide your name!</div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="email" class="col-sm-4 col-form-label">Email</label>
+                    <div class="col-sm-8">
+                        <input type="email" class="form-control" name="email" id="email" aria-describedby="emailHelp" required>
+                        <div class="invalid-feedback">Please provide a valid email!</div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary signup-submit">Submit</button>
+            </div>
+        </div>
+        <div class="card-footer" style="text-align: center;">
+            <a href="{{urlfor "AuthController.LoginPage"}}">Back to Login Page</a>
+        </div>
+    </div>
+</div>

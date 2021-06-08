@@ -8,11 +8,11 @@ import (
 
 type User struct {
 	gorm.Model
-	Username         string
-	Password         string
-	Name             string
-	Email            string
-	Cakes            Cake `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Username         string `json:"username,omitempty"`
+	Password         string `json:"password,omitempty"`
+	Name             string `json:"name,omitempty"`
+	Email            string `json:"email,omitempty"`
+	Cakes            Cake   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	TokenReset       string
 	TokenResetExpiry time.Time
 }

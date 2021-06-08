@@ -3,6 +3,9 @@
         <div class="card-title" style="text-align: center;">
             <h5 class="mt-2">Login to<br>Niel's Kitchen Catalog</h5>
         </div>
+        {{if .UserCreated}}
+        <div class="alert alert-success">User has been successfully created!<br>Login with your new account.</div>
+        {{end}}
         <div class="alert alert-danger" style="display: none;"></div>
         <div class="card-body">
             <div id="user-login">
@@ -19,6 +22,9 @@
                 </div>
                 <button type="submit" class="btn btn-primary login-submit">Submit</button>
             </div>
+        </div>
+        <div class="card-footer" style="text-align: center;">
+            <a href="{{urlfor "AuthController.SignUp"}}">Click here to sign up</a>
         </div>
     </div>
 </div>
