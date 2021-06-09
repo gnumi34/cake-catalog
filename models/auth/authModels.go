@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -17,8 +16,6 @@ import (
 func LogIn(authData models.AuthRequest) (models.User, error) {
 	user := models.User{}
 	err := database.Conn.Where("username = ?", authData.Username).First(&user).Error
-
-	log.Println("[INFO] User:", user)
 
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -38,14 +35,14 @@ func LogIn(authData models.AuthRequest) (models.User, error) {
 func SignUp(userData models.User) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userData.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return fmt.Errorf("error on bcrypt: %s", err.Error())
+		return fmt.Errorf("error on SignUp: %s", err.Error())
 	}
 
 	userData.Password = string(hashedPassword)
 
 	err = database.Conn.Create(&userData).Error
 	if err != nil {
-		return fmt.Errorf("error on DB creation: %s", err.Error())
+		return fmt.Errorf("error on SignUp: %s", err.Error())
 	}
 
 	return nil
@@ -77,4 +74,45 @@ func ForgetPassword(username string) (string, error) {
 	}
 
 	return getUser.TokenReset, nil
+}
+
+func IsResetTokenValid(token string) (bool, error) {
+	getUser := models.User{}
+	err := database.Conn.Where("token_reset = ?", token).Find(&getUser).Error
+
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		} else {
+			return false, fmt.Errorf("error on IsResetTokenValid: %s", err.Error())
+		}
+	}
+
+	if time.Now().Before(getUser.TokenResetExpiry) {
+		return true, nil
+	} else {
+		return false, nil
+	}
+}
+
+func ResetPassword(token string, password string) error {
+	getUser := models.User{}
+	err := database.Conn.Where("token_reset = ?", token).Find(&getUser).Error
+	if err != nil {
+		return fmt.Errorf("error on ResetPassword: %s", err.Error())
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("error on ResetPassword: %s", err.Error())
+	}
+
+	getUser.Password = string(hashedPassword)
+
+	err = database.Conn.Save(&getUser).Error
+	if err != nil {
+		return fmt.Errorf("error on ResetPassword: %s", err.Error())
+	}
+
+	return nil
 }

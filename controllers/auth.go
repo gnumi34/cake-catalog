@@ -23,6 +23,12 @@ func (ctx *AuthController) LoginPage() {
 	// Check if redirected from sign up page and successfully created one
 	userCreated := ctx.GetSession("user_created")
 	ctx.Data["UserCreated"] = userCreated
+	ctx.SetSession("user_created", false)
+
+	// Check if redirected from password reset and successfully resetted
+	passwordResetted := ctx.GetSession("reset_password")
+	ctx.Data["PasswordResetted"] = passwordResetted
+	ctx.SetSession("reset_password", false)
 
 	ctx.Layout = "auth/base.html"   // Main Layout
 	ctx.TplName = "auth/login.html" // .LayoutContent
@@ -165,16 +171,104 @@ func (ctx *AuthController) DoForgetPassword() {
 	ctx.ServeJSON()
 }
 
-func (ctx *AuthController) ResetPassword() {}
+func (ctx *AuthController) ResetPassword() {
+	// Check if the token is right or not
+	isValid, err := auth.IsResetTokenValid(ctx.GetString(":token"))
 
-func (ctx *AuthController) DoResetPassword() {}
+	if err != nil {
+		log.Println("[INFO] ResetPassword:", err.Error())
+		ctx.Abort("500")
+	}
 
-func (ctx *AuthController) SuccessResetPassword() {}
+	ctx.Layout = "auth/base.html"           // Main Layout
+	ctx.TplName = "auth/resetPassword.html" // .LayoutContent
+	ctx.Data["xsrf_token"] = ctx.XSRFToken()
+	ctx.Data["xsrfdata"] = template.HTML(ctx.XSRFFormHTML())
+	ctx.Data["IsValid"] = isValid
+	ctx.Data["Token"] = ctx.GetString(":token")
+
+	ctx.LayoutSections = make(map[string]string)
+	ctx.LayoutSections["Scripts"] = "auth/scripts.html" // .Scripts
+}
+
+func (ctx *AuthController) DoResetPassword() {
+	// Check if the token is right or not
+	isValid, err := auth.IsResetTokenValid(ctx.GetString(":token"))
+
+	if err != nil {
+		log.Println("[ERROR] DoResetPassword:", err.Error())
+		ctx.Data["json"] = models.JSONResponse{
+			HttpRes: 500,
+			Status:  "Internal Server Error",
+			Data: map[string]interface{}{
+				"errors": err.Error(),
+			},
+		}
+		ctx.ServeJSON()
+		return
+	}
+
+	if !isValid {
+		log.Println("[ERROR] DoResetPassword:", err.Error())
+		ctx.Data["json"] = models.JSONResponse{
+			HttpRes: 400,
+			Status:  "Invalid Token",
+			Data: map[string]interface{}{
+				"errors": err.Error(),
+			},
+		}
+		ctx.ServeJSON()
+		return
+	}
+
+	type Password struct {
+		Password string `json:"password"`
+	}
+
+	password := Password{}
+	if err = json.Unmarshal(ctx.Ctx.Input.RequestBody, &password); err != nil {
+		log.Println("[ERROR] DoResetPassword:", err.Error())
+		ctx.Data["json"] = models.JSONResponse{
+			HttpRes: 500,
+			Status:  "Internal Server Error",
+			Data: map[string]interface{}{
+				"errors": err.Error(),
+			},
+		}
+		ctx.ServeJSON()
+		return
+	}
+
+	err = auth.ResetPassword(ctx.GetString(":token"), password.Password)
+	if err != nil {
+		log.Println("[ERROR] DoResetPassword:", err.Error())
+		ctx.Data["json"] = models.JSONResponse{
+			HttpRes: 500,
+			Status:  "Internal Server Error",
+			Data: map[string]interface{}{
+				"errors": err.Error(),
+			},
+		}
+		ctx.ServeJSON()
+		return
+	}
+
+	ctx.SetSession("reset_password", true)
+	log.Printf("[INFO] Password Successfully Resetted.")
+
+	response := models.JSONResponse{
+		HttpRes: 302,
+		Data: map[string]interface{}{
+			"response": "ok",
+		},
+		Status: "Success",
+	}
+
+	ctx.Data["json"] = &response
+	ctx.ServeJSON()
+}
 
 func (ctx *AuthController) SignUp() {
-	// Clear User Creation Session
-	ctx.SetSession("user_created", false)
-
 	ctx.Layout = "auth/base.html"    // Main Layout
 	ctx.TplName = "auth/signup.html" // .LayoutContent
 	ctx.Data["xsrf_token"] = ctx.XSRFToken()

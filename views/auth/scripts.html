@@ -29,9 +29,11 @@
                         if (res["data"]["response"] == "ok") {
                             window.location.href = "/";
                         } else if (res["data"]["response"] == "not found")  {
+                            console.log(`Response Status: ${res["status"]}`);
                             console.log(`Error: ${res["data"]["response"]}`);
                             alert.html("Invalid username / password. Please try again.").show();
                         } else {
+                            console.log(`Response Status: ${res["status"]}`);
                             console.log(`Error: ${res["data"]["errors"]}`);
                             alert.html("Backend server error. Please try again later.").show();
                         }
@@ -87,6 +89,7 @@
                             if (res["data"]["response"] == "ok") {
                                 window.location.href = "/auth/login";
                             } else if (res["data"]["response"] == "invalid data")  {
+                                console.log(`Response Status: ${res["status"]}`);
                                 console.log(`Error: ${res["data"]["errors"]}`);
                                 let error_list;
                                 for (error of res["data"]["errors"]) {
@@ -102,6 +105,7 @@
                                 </ul>
                                 `).show();
                             } else {
+                                console.log(`Response Status: ${res["status"]}`);
                                 console.log(`Error: ${res["data"]["errors"]}`);
                                 alert.html("Backend server error. Please try again later.").show();
                             }
@@ -127,6 +131,8 @@
             }
             if (password1 == "") {
                 $("#password1").parent().children(".invalid-feedback").show();
+            } else if (!document.getElementById("password1").checkValidity()) {
+                $("#password1").parent().children(".invalid-feedback").html("Please enter the password with the correct length!").show();
             }
             if (name == "") {
                 $("#name").parent().children(".invalid-feedback").show();
@@ -136,7 +142,7 @@
             }
         });
 
-        $(".password-reset-submit").click(function() {
+        $(".forget-password-submit").click(function() {
             // Hide errors on form
             alert.hide();
             $("#username").parent().children(".invalid-feedback").hide();
@@ -160,9 +166,11 @@
                         if (res["data"]["response"] == "ok") {
                             window.location.href = "/auth/forgetPassword";
                         } else if (res["data"]["response"] == "not found")  {
-                            console.log(`Error: ${res["data"]["response"]}`);
+                            console.log(`Response Status: ${res["status"]}`);
+                            console.log(`Error: ${res["data"]["errors"]}`);
                             alert.html("The user name you entered is not registered.<br>Try again.").show();
                         } else {
+                            console.log(`Response Status: ${res["status"]}`);
                             console.log(`Error: ${res["data"]["errors"]}`);
                             alert.html("Backend server error. Please try again later.").show();
                         }
@@ -174,6 +182,68 @@
             }
             if (username == "") {
                 $("#username").parent().children(".invalid-feedback").show();
+            }
+        });
+
+        $(".reset-password-submit").click(function() {
+            // Hide errors on form
+            alert.hide();
+            $("#password1").parent().children(".invalid-feedback").hide();
+            $("#password2").parent().children(".invalid-feedback").hide();
+
+            var password1 = $("#password1").val().trim();
+            var password2 = $("#password2").val().trim();
+            var token = $("#token").val().trim();
+            var xsrf_token = $('input[name="_xsrf"]').val().trim();
+
+            var resetUrl = "/auth/resetPassword/" + token;
+
+            if (password1 != "" && password2 != "") {
+                if (password1 == password2 && document.getElementById("password1").checkValidity()) {
+                    $.ajax({
+                        url: resetUrl,
+                        type: "post",
+                        dataType: "json",
+                        contentType: "application/json",
+                        headers: {
+                            'X-XSRFToken': xsrf_token
+                        },
+                        data: JSON.stringify({
+                            "password": password1,
+                        }),
+                        success: function(res) {
+                            if (res["data"]["response"] == "ok") {
+                                window.location.href = "/auth/login";
+                            } else if (res["data"]["response"] == "invalid")  {
+                                console.log(`Response Status: ${res["status"]}`);
+                                console.log(`Error: ${res["data"]["errors"]}`);
+                                alert.html("The token is invalid/already expired.<br>Try making password reset request again.").show();
+                            } else {
+                                console.log(`Response Status: ${res["status"]}`);
+                                console.log(`Error: ${res["data"]["errors"]}`);
+                                alert.html("Backend server error. Please try again later.").show();
+                            }
+                        },
+                        error: function() {
+                            alert.html("Failed to connect with the authentication backend.").show();
+                        }
+                    });
+                }
+                if (password1 != password2) {
+                    $("#password2").parent().children(".invalid-feedback").show();
+                }
+                if (!document.getElementById("password1").checkValidity()) {
+                    $("#password1").parent().children(".invalid-feedback").html("Please enter the password with the correct length!").show();
+                }
+            }
+            if (password1 == "") {
+                $("#password1").parent().children(".invalid-feedback").show();
+            } else if (!document.getElementById("password1").checkValidity()) {
+                $("#password1").parent().children(".invalid-feedback").html("Please enter the password with the correct length!").show();
+            }
+
+            if (password2 == "") {
+                $("#password2").parent().children(".invalid-feedback").show();
             }
         });
     });

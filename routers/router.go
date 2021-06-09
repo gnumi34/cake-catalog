@@ -17,7 +17,6 @@ func init() {
 		beego.NSRouter("/forgetPassword", &controllers.AuthController{}, "post:DoForgetPassword"),
 		beego.NSRouter("/resetPassword/:token", &controllers.AuthController{}, "get:ResetPassword"),
 		beego.NSRouter("/resetPassword/:token", &controllers.AuthController{}, "post:DoResetPassword"),
-		beego.NSRouter("/resetPasswordSuccess", &controllers.AuthController{}, "get:SuccessResetPassword"),
 		beego.NSRouter("/signup", &controllers.AuthController{}, "get:SignUp"),
 		beego.NSRouter("/signup", &controllers.AuthController{}, "post:DoSignUp"),
 	)
